@@ -59,7 +59,7 @@ def bundle_submissions_srgb(submission_folder):
     eval_version="1.0"
 
     for i in range(50):
-        Idenoised = np.zeros((20,), dtype=np.object)
+        Idenoised = np.zeros((20,), dtype=object)
         for bb in range(20):
             filename = '%04d_%02d.mat'%(i+1,bb+1)
             s = sio.loadmat(os.path.join(submission_folder,filename))

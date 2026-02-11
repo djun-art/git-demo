@@ -161,8 +161,7 @@ class BaseTrainer():
         if 'crop' in self.cfg['test']:
             # (warning) self_ensemble cannot be applied with multi-input model
             denoiser_fn = self.denoiser
-            self.denoiser = lambda *input_data: self.crop_test(denoiser_fn, *input_data, size=self.cfg['test']['crop'])
-            
+            self.denoiser = lambda *input_data: self.crop_test(denoiser_fn, *input_data, size=self.cfg['test']['crop'], overlap=96)            
     def _before_train(self):
         # cudnn
         torch.backends.cudnn.benchmark = False

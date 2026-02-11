@@ -61,8 +61,10 @@ validation:
   add_con: 0.5
   floor: True
 
-  val: True
-  save_image: True
+  # val: True
+  # save_image: True
+  val: False
+  save_image: False
 
   start_epoch: 8
   interval_epoch: 4
@@ -77,7 +79,7 @@ log:
 
 test:
   dataset: DND_benchmark
-
+  crop: 384
   dataset_args:
     crop_size: None # [64, 64]
     add_noise: None # e.g.) None uni-15. gau-15. gau_blind-10.:50. poi_gau-10.:50.
