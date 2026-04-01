@@ -101,6 +101,9 @@ class local_branch(nn.Module):
         return x
 
 
+# ... (保留原有的 imports 和 local_branch 等代码) ...
+
+
 class global_branch(nn.Module):
     def __init__(self, stride, in_ch, num_module, group=1, head_ch=None, SIDD=True):
         super().__init__()
@@ -113,9 +116,32 @@ class global_branch(nn.Module):
 
         self.Maskconv = DSPMC_21(head_ch, in_ch, kernel_size=kernel, stride=1, padding=pad, groups=group, padding_mode='reflect')
 
-        self.body = DTB(stride=stride, num_blocks=num_module, dim=in_ch)
+        # --- TBSN 配置 ---
+        # stride在这里是由 LGBPN 传入的，通常 Global Branch stride=3
+        # 为了保证 M-WSA 不会出现全 -inf 的行（NaN risk），window_size 至少要是 2*stride
+        # stride=3 -> window_size >= 6。推荐 12。
+        tbsn_window = 12 
+        
+        # G-CSA 分组数。要确保 in_ch 和 heads 能被整除。
+        # 假设 in_ch=128
+        tbsn_groups = 4 
+        tbsn_heads = [8] # 128/8 = 16 dim per head; 8 heads / 4 groups = 2 heads per group. 合法。
+
+        # 简单的兼容性回退
+        if in_ch % tbsn_groups != 0:
+            tbsn_groups = 1
+        
+        self.body = DTB(
+            stride=stride, 
+            num_blocks=num_module, 
+            dim=in_ch, 
+            heads=tbsn_heads,         # 使用 8 heads 配合 groups
+            gcsa_groups=tbsn_groups,  # 传入 G-CSA 组数
+            window_size=tbsn_window   # 传入 Window Size
+        )
         self.SIDD = SIDD
 
+    # ... (forward 方法保持完全不变) ...
     def forward(self, x, refine=False, dict=None):
         
         if self.SIDD:
